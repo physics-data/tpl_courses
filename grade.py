@@ -13,13 +13,19 @@ import random
 import string
 
 
-def write_grade(grade):
+def write_grade(grade, suffix):
+    if os.isatty(1):
+        print('Removing all files with suffix', suffix)
+        os.system('rm -f *{}'.format(suffix))
+
     data = {}
     data['grade'] = grade
     if os.isatty(1):
         print('Grade: {}/80'.format(grade))
     else:
         print(json.dumps(data))
+
+    sys.exit(0)
 
 
 if __name__ == '__main__':
@@ -33,28 +39,28 @@ if __name__ == '__main__':
         print('SUFFIX is', suffix)
     os.environ['SUFFIX'] = suffix
 
-    depedency = {}
-    depedency[('thesis', 'analytical_mechanics')] = 1
-    depedency[('thesis', 'quantum_mechanics')] = 1
-    depedency[('thesis', 'statistical_mechanics')] = 1
-    depedency[('thesis', 'electrodynamics')] = 1
-    depedency[('analytical_mechanics', 'multivariate_calculus')] = 1
-    depedency[('analytical_mechanics', 'general_physics')] = 1
-    depedency[('analytical_mechanics', 'mathematical_physics')] = 1
-    depedency[('thermodynamics', 'multivariate_calculus')] = 1
-    depedency[('thermodynamics', 'general_physics')] = 1
-    depedency[('statistical_mechanics', 'thermodynamics')] = 1
-    depedency[('statistical_mechanics', 'probability_theory')] = 1
-    depedency[('quantum_mechanics', 'linear_algebra')] = 1
-    depedency[('quantum_mechanics', 'general_physics')] = 1
-    depedency[('quantum_mechanics', 'analytical_mechanics')] = 1
-    depedency[('multivariate_calculus', 'univariate_calculus')] = 1
-    depedency[('mathematical_physics', 'multivariate_calculus')] = 1
-    depedency[('mathematical_physics', 'linear_algebra')] = 1
-    depedency[('electrodynamics', 'multivariate_calculus')] = 1
-    depedency[('electrodynamics', 'general_physics')] = 1
-    depedency[('electrodynamics', 'mathematical_physics')] = 1
-    depedency[('probability_theory', 'multivariate_calculus')] = 1
+    dependency = {}
+    dependency[('thesis', 'analytical_mechanics')] = 1
+    dependency[('thesis', 'quantum_mechanics')] = 1
+    dependency[('thesis', 'statistical_mechanics')] = 1
+    dependency[('thesis', 'electrodynamics')] = 1
+    dependency[('analytical_mechanics', 'multivariate_calculus')] = 1
+    dependency[('analytical_mechanics', 'general_physics')] = 1
+    dependency[('analytical_mechanics', 'mathematical_physics')] = 1
+    dependency[('thermodynamics', 'multivariate_calculus')] = 1
+    dependency[('thermodynamics', 'general_physics')] = 1
+    dependency[('statistical_mechanics', 'thermodynamics')] = 1
+    dependency[('statistical_mechanics', 'probability_theory')] = 1
+    dependency[('quantum_mechanics', 'linear_algebra')] = 1
+    dependency[('quantum_mechanics', 'general_physics')] = 1
+    dependency[('quantum_mechanics', 'analytical_mechanics')] = 1
+    dependency[('multivariate_calculus', 'univariate_calculus')] = 1
+    dependency[('mathematical_physics', 'multivariate_calculus')] = 1
+    dependency[('mathematical_physics', 'linear_algebra')] = 1
+    dependency[('electrodynamics', 'multivariate_calculus')] = 1
+    dependency[('electrodynamics', 'general_physics')] = 1
+    dependency[('electrodynamics', 'mathematical_physics')] = 1
+    dependency[('probability_theory', 'multivariate_calculus')] = 1
 
     if os.isatty(1):
         print('Removing all files with suffix', suffix)
@@ -82,16 +88,22 @@ if __name__ == '__main__':
                 if line.startswith('touch '):
                     steps.append(line.split(' ')[1].split('.')[0])
 
-            # check depedency
+            # check dependency
             flag = 1
-            for i in range(len(steps)):
-                for j in range(i+1, len(steps)):
-                    if (steps[i], steps[j]) in depedency:
-                        if os.isatty(1):
-                            print('error: {} should appear after {}'.format(steps[j], steps[i]))
-                        flag = 0
+            for (a, b) in dependency: # a after b
+                try:
+                    idx_a = steps.index(a)
+                    idx_b = steps.index(b)
+                    if idx_a < idx_b:
+                        raise Exception()
+                except:
+                    if os.isatty(1):
+                        print('error: {} should appear after {}'.format(a, b))
+                    flag = 0
+                
             if flag:
                 grade += 30
+
         except Exception:
             if os.isatty(1):
                 print('Unexpected stdout:')
@@ -101,8 +113,7 @@ if __name__ == '__main__':
         sys.stdout.buffer.write(stderr)
 
     if grade != 30:
-        write_grade(grade)
-        sys.exit(0)
+        write_grade(grade, suffix)
 
 
     # Part 2
@@ -119,7 +130,7 @@ if __name__ == '__main__':
     if len(stderr) == 0:
         try:
             flag = 1
-            for course1, course2 in depedency:
+            for course1, course2 in dependency:
                 flag_course2 = 0
                 path = '{}{}'.format(course1, suffix)
                 if not os.path.exists(path):
@@ -133,7 +144,7 @@ if __name__ == '__main__':
                     for depend in line.split(' '):
                         depend = depend.strip()
                         if len(depend) > 0:
-                            if not (course1, depend) in depedency:
+                            if not (course1, depend) in dependency:
                                 flag = 0
                                 if os.isatty(1):
                                     print('Unexpected dependency: {} -> {}'.format(course1, depend))
@@ -156,8 +167,7 @@ if __name__ == '__main__':
         sys.stdout.buffer.write(stderr)
 
     if grade != 70:
-        write_grade(grade)
-        sys.exit(0)
+        write_grade(grade, suffix)
 
 
     # Part 3
@@ -174,7 +184,7 @@ if __name__ == '__main__':
     if len(stderr) == 0:
         try:
             flag = 1
-            for course1, course2 in depedency:
+            for course1, course2 in dependency:
                 path = '{}{}'.format(course1, suffix)
                 if os.path.exists(path):
                     flag = 0
@@ -192,9 +202,5 @@ if __name__ == '__main__':
         print('Your program exited with:')
         sys.stdout.buffer.write(stderr)
 
-    if os.isatty(1):
-        print('Removing all files with suffix', suffix)
-    os.system('rm -f *{}'.format(suffix))
-
-    write_grade(grade)
+    write_grade(grade, suffix)
 
