@@ -13,172 +13,188 @@ import random
 import string
 
 
-if sys.version_info[0] != 3:
-    print("Plz use python3")
-    sys.exit()
+def write_grade(grade):
+    data = {}
+    data['grade'] = grade
+    if os.isatty(1):
+        print('Grade: {}/80'.format(grade))
+    else:
+        print(json.dumps(data))
 
-suffix = '.' + ''.join([random.choice(string.ascii_lowercase) for i in range(4)])
-if os.isatty(1):
-    print('SUFFIX is', suffix)
-os.environ['SUFFIX'] = suffix
 
-depedency = {}
-depedency[('thesis', 'analytical_mechanics')] = 1
-depedency[('thesis', 'quantum_mechanics')] = 1
-depedency[('thesis', 'statistical_mechanics')] = 1
-depedency[('thesis', 'electrodynamics')] = 1
-depedency[('analytical_mechanics', 'multivariate_calculus')] = 1
-depedency[('analytical_mechanics', 'general_physics')] = 1
-depedency[('analytical_mechanics', 'mathematical_physics')] = 1
-depedency[('thermodynamics', 'multivariate_calculus')] = 1
-depedency[('thermodynamics', 'general_physics')] = 1
-depedency[('statistical_mechanics', 'thermodynamics')] = 1
-depedency[('statistical_mechanics', 'probability_theory')] = 1
-depedency[('quantum_mechanics', 'linear_algebra')] = 1
-depedency[('quantum_mechanics', 'general_physics')] = 1
-depedency[('quantum_mechanics', 'analytical_mechanics')] = 1
-depedency[('multivariate_calculus', 'univariate_calculus')] = 1
-depedency[('mathematical_physics', 'multivariate_calculus')] = 1
-depedency[('mathematical_physics', 'linear_algebra')] = 1
-depedency[('electrodynamics', 'multivariate_calculus')] = 1
-depedency[('electrodynamics', 'general_physics')] = 1
-depedency[('electrodynamics', 'mathematical_physics')] = 1
-depedency[('probability_theory', 'multivariate_calculus')] = 1
+if __name__ == '__main__':
 
-if os.isatty(1):
-    print('Removing all files with suffix', suffix)
-os.system('rm -f *{}'.format(suffix))
+    if sys.version_info[0] != 3:
+        print("Plz use python3")
+        sys.exit()
 
-data = {}
-grade = 0
+    suffix = '.' + ''.join([random.choice(string.ascii_lowercase) for i in range(4)])
+    if os.isatty(1):
+        print('SUFFIX is', suffix)
+    os.environ['SUFFIX'] = suffix
 
-# Part 1
-if os.isatty(1):
-    print('Running make -n'.format(suffix))
-p = subprocess.Popen(['make', '-n'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-start_time = time.time()
+    depedency = {}
+    depedency[('thesis', 'analytical_mechanics')] = 1
+    depedency[('thesis', 'quantum_mechanics')] = 1
+    depedency[('thesis', 'statistical_mechanics')] = 1
+    depedency[('thesis', 'electrodynamics')] = 1
+    depedency[('analytical_mechanics', 'multivariate_calculus')] = 1
+    depedency[('analytical_mechanics', 'general_physics')] = 1
+    depedency[('analytical_mechanics', 'mathematical_physics')] = 1
+    depedency[('thermodynamics', 'multivariate_calculus')] = 1
+    depedency[('thermodynamics', 'general_physics')] = 1
+    depedency[('statistical_mechanics', 'thermodynamics')] = 1
+    depedency[('statistical_mechanics', 'probability_theory')] = 1
+    depedency[('quantum_mechanics', 'linear_algebra')] = 1
+    depedency[('quantum_mechanics', 'general_physics')] = 1
+    depedency[('quantum_mechanics', 'analytical_mechanics')] = 1
+    depedency[('multivariate_calculus', 'univariate_calculus')] = 1
+    depedency[('mathematical_physics', 'multivariate_calculus')] = 1
+    depedency[('mathematical_physics', 'linear_algebra')] = 1
+    depedency[('electrodynamics', 'multivariate_calculus')] = 1
+    depedency[('electrodynamics', 'general_physics')] = 1
+    depedency[('electrodynamics', 'mathematical_physics')] = 1
+    depedency[('probability_theory', 'multivariate_calculus')] = 1
 
-while p.poll() is None:
-    if time.time() - start_time > 1:
-        p.kill()
+    if os.isatty(1):
+        print('Removing all files with suffix', suffix)
+    os.system('rm -f *{}'.format(suffix))
 
-stdout, stderr = p.communicate(timeout=1)
+    grade = 0
 
-if len(stderr) == 0:
-    try:
-        lines = stdout.decode('utf-8').split('\n')
-        steps = []
-        for line in lines:
-            if line.startswith('touch '):
-                steps.append(line.split(' ')[1].split('.')[0])
+    # Part 1
+    if os.isatty(1):
+        print('Running \'make -n\'')
+    p = subprocess.Popen(['make', '-n'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    start_time = time.time()
 
-        # check depedency
-        flag = 1
-        for i in range(len(steps)):
-            for j in range(i+1, len(steps)):
-                if (steps[i], steps[j]) in depedency:
-                    if os.isatty(1):
-                        print('error: {} should appear after {}'.format(steps[j], steps[i]))
+    while p.poll() is None:
+        if time.time() - start_time > 1:
+            p.kill()
+
+    stdout, stderr = p.communicate(timeout=1)
+
+    if len(stderr) == 0:
+        try:
+            lines = stdout.decode('utf-8').split('\n')
+            steps = []
+            for line in lines:
+                if line.startswith('touch '):
+                    steps.append(line.split(' ')[1].split('.')[0])
+
+            # check depedency
+            flag = 1
+            for i in range(len(steps)):
+                for j in range(i+1, len(steps)):
+                    if (steps[i], steps[j]) in depedency:
+                        if os.isatty(1):
+                            print('error: {} should appear after {}'.format(steps[j], steps[i]))
+                        flag = 0
+            if flag:
+                grade += 30
+        except Exception:
+            if os.isatty(1):
+                print('Unexpected stdout:')
+                sys.stdout.buffer.write(stdout)
+    elif os.isatty(1):
+        print('Your program exited with:')
+        sys.stdout.buffer.write(stderr)
+
+    if grade != 30:
+        write_grade(grade)
+        sys.exit(0)
+
+
+    # Part 2
+    if os.isatty(1):
+        print('Running \'make\'')
+    p = subprocess.Popen(['make'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    start_time = time.time()
+
+    while p.poll() is None:
+        if time.time() - start_time > 1:
+            p.kill()
+
+    stdout, stderr = p.communicate(timeout=1)
+    if len(stderr) == 0:
+        try:
+            flag = 1
+            for course1, course2 in depedency:
+                flag_course2 = 0
+                path = '{}{}'.format(course1, suffix)
+                if not os.path.exists(path):
                     flag = 0
-        if flag:
-            grade += 30
-    except Exception:
-        if os.isatty(1):
-            print('unexpected stdout:')
-            sys.stdout.buffer.write(stdout)
-elif os.isatty(1):
-    print('your program exited with:')
-    sys.stdout.buffer.write(stderr)
+                    if os.isatty(1):
+                        print('File missing: {}'.format(path))
+                    continue
+
+                with open('{}{}'.format(course1, suffix), 'r') as f:
+                    line = f.readline()
+                    for depend in line.split(' '):
+                        depend = depend.strip()
+                        if len(depend) > 0:
+                            if not (course1, depend) in depedency:
+                                flag = 0
+                                if os.isatty(1):
+                                    print('Unexpected dependency: {} -> {}'.format(course1, depend))
+                            if depend == course2:
+                                flag_course2 = 1
+
+                if not flag_course2:
+                    if os.isatty(1):
+                        print('Dependency missing: {} -> {}'.format(course1, course2))
+                    flag = 0
+                
+            if flag:
+                grade += 40
+        except Exception:
+            if os.isatty(1):
+                print('Unexpected stdout:')
+                sys.stdout.buffer.write(stdout)
+    elif os.isatty(1):
+        print('Your program exited with:')
+        sys.stdout.buffer.write(stderr)
+
+    if grade != 70:
+        write_grade(grade)
+        sys.exit(0)
 
 
-# Part 2
-if os.isatty(1):
-    print('Running make'.format(suffix))
-p = subprocess.Popen(['make'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-start_time = time.time()
+    # Part 3
+    if os.isatty(1):
+        print('Running \'make clean\'')
+    p = subprocess.Popen(['make', 'clean'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    start_time = time.time()
 
-while p.poll() is None:
-    if time.time() - start_time > 1:
-        p.kill()
+    while p.poll() is None:
+        if time.time() - start_time > 1:
+            p.kill()
 
-stdout, stderr = p.communicate(timeout=1)
-if len(stderr) == 0:
-    try:
-        flag = 1
-        for course1, course2 in depedency:
-            flag_course2 = 0
-            path = '{}{}'.format(course1, suffix)
-            if not os.path.exists(path):
-                flag = 0
-                if os.isatty(1):
-                    print('File missing: {}'.format(path))
-                continue
+    stdout, stderr = p.communicate(timeout=1)
+    if len(stderr) == 0:
+        try:
+            flag = 1
+            for course1, course2 in depedency:
+                path = '{}{}'.format(course1, suffix)
+                if os.path.exists(path):
+                    flag = 0
+                    if os.isatty(1):
+                        print('File still exists: {}'.format(path))
+                    continue
+                
+            if flag:
+                grade += 10
+        except Exception:
+            if os.isatty(1):
+                print('Unexpected stdout:')
+                sys.stdout.buffer.write(stdout)
+    elif os.isatty(1):
+        print('Your program exited with:')
+        sys.stdout.buffer.write(stderr)
 
-            with open('{}{}'.format(course1, suffix), 'r') as f:
-                line = f.readline()
-                for depend in line.split(' '):
-                    depend = depend.strip()
-                    if len(depend) > 0:
-                        if not (course1, depend) in depedency:
-                            flag = 0
-                            if os.isatty(1):
-                                print('Unexpceted dependency: {} -> {}'.format(course1, depend))
-                        if depend == course2:
-                            flag_course2 = 1
+    if os.isatty(1):
+        print('Removing all files with suffix', suffix)
+    os.system('rm -f *{}'.format(suffix))
 
-            if not flag_course2:
-                if os.isatty(1):
-                    print('Dependency missing: {} -> {}'.format(course1, course2))
-                flag = 0
-            
-        if flag:
-            grade += 40
-    except Exception:
-        if os.isatty(1):
-            print('unexpected stdout:')
-            sys.stdout.buffer.write(stdout)
-elif os.isatty(1):
-    print('your program exited with:')
-    sys.stdout.buffer.write(stderr)
+    write_grade(grade)
 
-# Part 3
-if os.isatty(1):
-    print('Running make clean'.format(suffix))
-p = subprocess.Popen(['make', 'clean'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-start_time = time.time()
-
-while p.poll() is None:
-    if time.time() - start_time > 1:
-        p.kill()
-
-stdout, stderr = p.communicate(timeout=1)
-if len(stderr) == 0:
-    try:
-        flag = 1
-        for course1, course2 in depedency:
-            path = '{}{}'.format(course1, suffix)
-            if os.path.exists(path):
-                flag = 0
-                if os.isatty(1):
-                    print('File still exists: {}'.format(path))
-                continue
-            
-        if flag:
-            grade += 10
-    except Exception:
-        if os.isatty(1):
-            print('unexpected stdout:')
-            sys.stdout.buffer.write(stdout)
-elif os.isatty(1):
-    print('your program exited with:')
-    sys.stdout.buffer.write(stderr)
-
-if os.isatty(1):
-    print('Removing all files with suffix', suffix)
-os.system('rm -f *{}'.format(suffix))
-
-data['grade'] = grade
-if os.isatty(1):
-    print('得分：%d/80' % grade)
-else:
-    print(json.dumps(data))
