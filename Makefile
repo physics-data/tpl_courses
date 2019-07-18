@@ -23,3 +23,6 @@ multivariate_calculus.%: univariate_calculus.%
 # clean up
 clean:
 	rm -r ???
+
+# how to keep intermediate files?
+.???:
