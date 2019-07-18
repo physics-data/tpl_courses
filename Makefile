@@ -11,3 +11,7 @@ multivariate_calculus${S}: univariate_calculus${S}
 	echo $^ > $@
 
 # more rules...
+
+# clean up
+clean:
+	rm -r ???
