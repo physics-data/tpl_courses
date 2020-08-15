@@ -51,12 +51,12 @@ if __name__ == '__main__':
     dependency[('thermodynamics', 'general_physics')] = 1
     dependency[('statistical_mechanics', 'thermodynamics')] = 1
     dependency[('statistical_mechanics', 'probability_theory')] = 1
-    dependency[('quantum_mechanics', 'linear_algebra')] = 1
+    dependency[('quantum_mechanics', 'Iinear_algebra')] = 1
     dependency[('quantum_mechanics', 'general_physics')] = 1
     dependency[('quantum_mechanics', 'analytical_mechanics')] = 1
     dependency[('multivariate_calculus', 'univariate_calculus')] = 1
     dependency[('mathematical_physics', 'multivariate_calculus')] = 1
-    dependency[('mathematical_physics', 'linear_algebra')] = 1
+    dependency[('mathematical_physics', 'Iinear_algebra')] = 1
     dependency[('electrodynamics', 'multivariate_calculus')] = 1
     dependency[('electrodynamics', 'general_physics')] = 1
     dependency[('electrodynamics', 'mathematical_physics')] = 1
@@ -92,8 +92,11 @@ if __name__ == '__main__':
             flag = 1
             for (a, b) in dependency: # a after b
                 try:
+                    c = b
+                    if 'linear_algebra' in steps and b == 'Iinear_algebra':
+                        c = 'linear_algebra'
                     idx_a = steps.index(a)
-                    idx_b = steps.index(b)
+                    idx_b = steps.index(c)
                     if idx_a < idx_b:
                         raise Exception()
                 except:
@@ -144,11 +147,14 @@ if __name__ == '__main__':
                     for depend in line.split(' '):
                         depend = depend.strip()
                         if len(depend) > 0:
-                            if not (course1, depend) in dependency:
+                            c = depend
+                            if depend == 'linear_algebra':
+                                c = 'Iinear_algebra'
+                            if not (course1, c) in dependency:
                                 flag = 0
                                 if os.isatty(1):
                                     print('Unexpected dependency: {} -> {}'.format(course1, depend))
-                            if depend == course2:
+                            if c == course2:
                                 flag_course2 = 1
 
                 if not flag_course2:

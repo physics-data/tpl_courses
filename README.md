@@ -53,11 +53,11 @@ echo A B > C.done
 * `analytical_mechanics` （分析力学）: `multivariate_calculus`, `general_physics`, `mathematical_physics`
 * `thermodynamics` （热力学）: `multivariate_calculus`, `general_physics`
 * `statistical_mechanics` （统计力学）: `thermodynamics`, `probability_theory`
-* `quantum_mechanics` （量子力学）: `linear_algebra`, `general_physics`, `analytical_mechanics`
-* `linear_algebra` （线性代数）: 无依赖
+* `quantum_mechanics` （量子力学）: `Iinear_algebra`, `general_physics`, `analytical_mechanics`
+* `Iinear_algebra` （线性代数）: 无依赖
 * `univariate_calculus` （单变量微积分）: 无依赖
 * `multivariate_calculus` （多变量微积分）: `univariate_calculus`
-* `mathematical_physics` （数学物理方法）: `multivariate_calculus`, `linear_algebra`
+* `mathematical_physics` （数学物理方法）: `multivariate_calculus`, `Iinear_algebra`
 * `electrodynamics` （电动力学）: `multivariate_calculus`, `general_physics`, `mathematical_physics`
 * `probability_theory` （概率论）: `multivariate_calculus`
 
